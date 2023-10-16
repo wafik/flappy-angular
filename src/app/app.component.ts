@@ -46,6 +46,8 @@ export class AppComponent implements OnInit {
   velocityX = -2; //pipe move
   velocityY = 0; //bird jump speed
   gravity = 0.4;
+  isGameOver = false;
+  score = 0;
 
   @ViewChild('board', { static: true }) board!: ElementRef;
   constructor() {
@@ -54,18 +56,19 @@ export class AppComponent implements OnInit {
     this.update = this.update.bind(this);
     this.placePipes = this.placePipes.bind(this);
     this.moveBird = this.moveBird.bind(this);
+    this.detectCollision = this.detectCollision.bind(this);
   }
   @HostListener('document:keydown', ['$event'])
   keyEventDown(event: KeyboardEvent) {
-    if (event.code === 'Space'|| event.code == "ArrowUp" || event.code == "KeyX") {
-      this.moveBird;
+    if (
+      event.code === 'Space' ||
+      event.code == 'ArrowUp' ||
+      event.code == 'KeyX'
+    ) {
+      this.moveBird();
     }
   }
-  // @HostListener('document:keyup', ['$event'])
-  // keyEventUp(event: KeyboardEvent) {
-  //   if(event.code === 'Space') this.spacePressed = true;
-
-  // }
+  
   createCanvas() {
     const canvas: HTMLCanvasElement = this.board.nativeElement;
     const context = canvas.getContext('2d');
@@ -85,6 +88,7 @@ export class AppComponent implements OnInit {
       this.pipeImageTop.src = '../assets/toppipe.png';
       this.pipeImageBottom.src = '../assets/bottompipe.png';
     }
+
     requestAnimationFrame(this.update);
     setInterval(this.placePipes, 1500);
   }
@@ -95,14 +99,34 @@ export class AppComponent implements OnInit {
 
   moveBird() {
     this.velocityY = -6;
+    if (this.isGameOver) {
+      this.bird.y = this.birdY;
+      this.pipeArray = [];
+      this.score = 0;
+      this.isGameOver = false;
+    }
   }
   update() {
     requestAnimationFrame(this.update);
-    const canvas: HTMLCanvasElement = this.board.nativeElement;
-    const context = canvas.getContext('2d');
+    if (this.isGameOver) {
+      return;
+    }
+    let canvas: HTMLCanvasElement = this.board.nativeElement;
+    let context = canvas.getContext('2d');
+    // clear drawing
+    context?.clearRect(
+      0,
+      0,
+      this.board.nativeElement.width,
+      this.board.nativeElement.height
+    );
+
     // bird
     this.velocityY += this.gravity;
-    this.bird.y += this.velocityY;
+    // this.bird.y += this.velocityY;
+
+    // validation bird cannot fly or jump out of canvas
+    this.bird.y = Math.max(this.bird.y + this.velocityY, 0);
     context?.drawImage(
       this.birdImg,
       this.bird.x,
@@ -110,21 +134,43 @@ export class AppComponent implements OnInit {
       this.bird.width,
       this.bird.height
     );
-    // You can implement pipe drawing and other game logic here
-    for (let index = 0; index < this.pipeArray.length; index++) {
-      const element = this.pipeArray[index];
-      element.x += this.velocityX;
-      context?.drawImage(
-        element.img,
-        element.x,
-        element.y,
-        element.width,
-        element.height
-      );
+    // context?.fillStyle="";
+    if (this.bird.y > this.board.nativeElement.height) {
+      this.isGameOver = true;
+    }
+    for (let i = 0; i < this.pipeArray.length; i++) {
+      let pipe = this.pipeArray[i];
+      pipe.x += this.velocityX;
+      context?.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+
+      if (!pipe.passed && this.bird.x > pipe.x + pipe.width) {
+        this.score += 0.5;
+        pipe.passed = true;
+      }
+      if (this.detectCollision(this.bird, pipe)) {
+        this.isGameOver = true;
+      }
+      console.log(this.score);
+    }
+    // clear pipe
+    while (this.pipeArray.length > 0 && this.pipeArray[0].x < -this.pipeWidth) {
+      this.pipeArray.shift();
+    }
+
+    // score
+    // context?.fillStyle = "white";
+    // context?.font = '45px sans-serif';
+    context?.fillText(this.score.toString(), 5, 45);
+
+    if (this.isGameOver) {
+      context?.fillText('GAME OVER', this.board.nativeElement.width / 2, this.board.nativeElement.height / 2);
     }
   }
 
   placePipes() {
+    if (this.isGameOver) {
+      return;
+    }
     let randomPipeY =
       this.pipeY - this.pipeHeight / 4 - Math.random() * (this.pipeHeight / 2);
     let openingSpace = this.board.nativeElement.height / 4;
@@ -147,5 +193,14 @@ export class AppComponent implements OnInit {
       passed: false,
     };
     this.pipeArray.push(bottomPipe);
+  }
+
+  detectCollision(a: any, b: any) {
+    return (
+      a.x < b.x + b.width &&
+      a.x + a.width > b.x &&
+      a.y < b.y + b.height &&
+      a.y + a.height > b.y
+    );
   }
 }

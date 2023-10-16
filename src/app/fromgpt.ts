@@ -44,7 +44,7 @@ export class AppComponent implements OnInit {
   pipeImageBottom = new Image();
 
   // Physics
-  velocityX = -2;
+  velocityX = -2; 
   velocityY = 0;
   gravity = 0.4;
   isGameOver = false;
