@@ -171,6 +171,11 @@ export class AppComponent implements OnInit {
         this.board.nativeElement.width / 6,
         this.board.nativeElement.height / 2
       );
+      context?.fillText(
+        'Your Score : ' + this.score.toString(),
+        this.board.nativeElement.width / 6,
+        this.board.nativeElement.height / 2 + 45
+      );
     }
   }
 
