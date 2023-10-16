@@ -68,7 +68,7 @@ export class AppComponent implements OnInit {
       this.moveBird();
     }
   }
-  
+
   createCanvas() {
     const canvas: HTMLCanvasElement = this.board.nativeElement;
     const context = canvas.getContext('2d');
@@ -91,6 +91,7 @@ export class AppComponent implements OnInit {
 
     requestAnimationFrame(this.update);
     setInterval(this.placePipes, 1500);
+  
   }
 
   ngOnInit(): void {
@@ -158,12 +159,12 @@ export class AppComponent implements OnInit {
     }
 
     // score
-    // context?.fillStyle = "white";
-    // context?.font = '45px sans-serif';
+    context!.fillStyle = "white";
+    context!.font = '45px sans-serif';
     context?.fillText(this.score.toString(), 5, 45);
 
     if (this.isGameOver) {
-      context?.fillText('GAME OVER', this.board.nativeElement.width / 2, this.board.nativeElement.height / 2);
+      context?.fillText('GAME OVER', this.board.nativeElement.width / 6, this.board.nativeElement.height / 2);
     }
   }
 
