@@ -57,6 +57,8 @@ export class AppComponent implements OnInit {
     this.placePipes = this.placePipes.bind(this);
     this.moveBird = this.moveBird.bind(this);
     this.detectCollision = this.detectCollision.bind(this);
+    this.playAudioPoint = this.playAudioPoint.bind(this);
+    this.playAudioHit = this.playAudioHit.bind(this);
   }
   @HostListener('document:keydown', ['$event'])
   keyEventDown(event: KeyboardEvent) {
@@ -126,7 +128,6 @@ export class AppComponent implements OnInit {
 
     // bird
     this.velocityY += this.gravity;
-    // this.bird.y += this.velocityY;
 
     // validation bird cannot fly or jump out of canvas
     this.bird.y = Math.max(this.bird.y + this.velocityY, 0);
@@ -149,8 +150,10 @@ export class AppComponent implements OnInit {
       if (!pipe.passed && this.bird.x > pipe.x + pipe.width) {
         this.score += 0.5;
         pipe.passed = true;
+        this.playAudioPoint();
       }
       if (this.detectCollision(this.bird, pipe)) {
+        this.playAudioHit();
         this.isGameOver = true;
       }
       console.log(this.score);
@@ -168,13 +171,19 @@ export class AppComponent implements OnInit {
     if (this.isGameOver) {
       context?.fillText(
         'GAME OVER',
-        this.board.nativeElement.width / 6,
+        this.board.nativeElement.width / 7,
         this.board.nativeElement.height / 2
       );
       context?.fillText(
         'Your Score : ' + this.score.toString(),
-        this.board.nativeElement.width / 6,
+        this.board.nativeElement.width / 7,
         this.board.nativeElement.height / 2 + 45
+      );
+      context!.font = '20px sans-serif';
+      context?.fillText(
+        'Press To Restart',
+        this.board.nativeElement.width / 3,
+        this.board.nativeElement.height / 2 + 90
       );
     }
   }
@@ -214,5 +223,18 @@ export class AppComponent implements OnInit {
       a.y < b.y + b.height &&
       a.y + a.height > b.y
     );
+  }
+
+  playAudioPoint() {
+    let audio = new Audio();
+    audio.src = '../assets/audio/point.wav';
+    audio.load();
+    audio.play();
+  }
+  playAudioHit() {
+    let audio = new Audio();
+    audio.src = '../assets/audio/hit.wav';
+    audio.load();
+    audio.play();
   }
 }
