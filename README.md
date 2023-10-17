@@ -1,3 +1,12 @@
+
+# Tutorial
+https://www.youtube.com/watch?v=jj5ADM2uywg
+https://github.com/ImKennyYip/flappy-bird
+
+# Link DEMO
+https://flappy-angular.vercel.app/
+
+
 # FlappyV2
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.5.
