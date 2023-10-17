@@ -60,6 +60,7 @@ export class AppComponent implements OnInit {
     this.detectCollision = this.detectCollision.bind(this);
     this.playAudioPoint = this.playAudioPoint.bind(this);
     this.playAudioHit = this.playAudioHit.bind(this);
+    this.playAudioWing = this.playAudioWing.bind(this);
     this.localStorageScoreBest = this.localStorageScoreBest.bind(this);
   }
   @HostListener('document:keydown', ['$event'])
@@ -106,6 +107,8 @@ export class AppComponent implements OnInit {
 
   moveBird() {
     this.velocityY = -6;
+
+    this.playAudioWing();
     if (this.isGameOver) {
       this.bird.y = this.birdY;
       this.pipeArray = [];
@@ -142,7 +145,6 @@ export class AppComponent implements OnInit {
     );
     // context?.fillStyle="";
     if (this.bird.y > this.board.nativeElement.height) {
-      
       this.isGameOver = true;
     }
     for (let i = 0; i < this.pipeArray.length; i++) {
@@ -169,7 +171,11 @@ export class AppComponent implements OnInit {
     // score
     context!.fillStyle = 'white';
     context!.font = '45px sans-serif';
-    context?.fillText(this.score.toString(),  this.board.nativeElement.width / 2, 45);
+    context?.fillText(
+      this.score.toString(),
+      this.board.nativeElement.width / 2,
+      45
+    );
 
     if (this.isGameOver) {
       this.localStorageScoreBest();
@@ -182,8 +188,8 @@ export class AppComponent implements OnInit {
         'Your Score : ' + this.score.toString(),
         this.board.nativeElement.width / 7,
         this.board.nativeElement.height / 2 + 45
-      );  
-    
+      );
+
       context!.font = '20px sans-serif';
       context?.fillText(
         'Press To Restart',
@@ -248,11 +254,17 @@ export class AppComponent implements OnInit {
     audio.load();
     audio.play();
   }
+  playAudioWing() {
+    let audio = new Audio();
+    audio.src = '../assets/audio/wing.ogg';
+    audio.load();
+    audio.play();
+  }
   // localstorage for know best score
   localStorageScoreBest() {
-    this.scoreBest = parseInt(localStorage.getItem("SCORE_BEST_KEY") ?? '0');
+    this.scoreBest = parseInt(localStorage.getItem('SCORE_BEST_KEY') ?? '0');
     if (this.scoreBest < this.score) {
-      localStorage.setItem("SCORE_BEST_KEY", `${this.score}`);
+      localStorage.setItem('SCORE_BEST_KEY', `${this.score}`);
       this.scoreBest = this.score;
     }
   }
