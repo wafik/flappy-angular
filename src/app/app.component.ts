@@ -48,6 +48,7 @@ export class AppComponent implements OnInit {
   gravity = 0.4;
   isGameOver = false;
   score = 0;
+  scoreBest = 0;
 
   @ViewChild('board', { static: true }) board!: ElementRef;
   constructor() {
@@ -59,6 +60,7 @@ export class AppComponent implements OnInit {
     this.detectCollision = this.detectCollision.bind(this);
     this.playAudioPoint = this.playAudioPoint.bind(this);
     this.playAudioHit = this.playAudioHit.bind(this);
+    this.localStorageScoreBest = this.localStorageScoreBest.bind(this);
   }
   @HostListener('document:keydown', ['$event'])
   keyEventDown(event: KeyboardEvent) {
@@ -71,7 +73,6 @@ export class AppComponent implements OnInit {
     }
   }
   onClick(event: any) {
-    console.log(event);
     this.moveBird();
   }
   createCanvas() {
@@ -100,6 +101,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.createCanvas();
+    this.localStorageScoreBest();
   }
 
   moveBird() {
@@ -140,6 +142,7 @@ export class AppComponent implements OnInit {
     );
     // context?.fillStyle="";
     if (this.bird.y > this.board.nativeElement.height) {
+      
       this.isGameOver = true;
     }
     for (let i = 0; i < this.pipeArray.length; i++) {
@@ -151,12 +154,12 @@ export class AppComponent implements OnInit {
         this.score += 0.5;
         pipe.passed = true;
         this.playAudioPoint();
+        this.localStorageScoreBest();
       }
       if (this.detectCollision(this.bird, pipe)) {
         this.playAudioHit();
         this.isGameOver = true;
       }
-      console.log(this.score);
     }
     // clear pipe
     while (this.pipeArray.length > 0 && this.pipeArray[0].x < -this.pipeWidth) {
@@ -166,9 +169,10 @@ export class AppComponent implements OnInit {
     // score
     context!.fillStyle = 'white';
     context!.font = '45px sans-serif';
-    context?.fillText(this.score.toString(), 5, 45);
+    context?.fillText(this.score.toString(),  this.board.nativeElement.width / 2, 45);
 
     if (this.isGameOver) {
+      this.localStorageScoreBest();
       context?.fillText(
         'GAME OVER',
         this.board.nativeElement.width / 7,
@@ -178,12 +182,19 @@ export class AppComponent implements OnInit {
         'Your Score : ' + this.score.toString(),
         this.board.nativeElement.width / 7,
         this.board.nativeElement.height / 2 + 45
-      );
+      );  
+    
       context!.font = '20px sans-serif';
       context?.fillText(
         'Press To Restart',
         this.board.nativeElement.width / 3,
         this.board.nativeElement.height / 2 + 90
+      );
+      context!.font = '20px sans-serif';
+      context?.fillText(
+        'Best Score : ' + this.scoreBest.toString(),
+        this.board.nativeElement.width / 3,
+        this.board.nativeElement.height / 2 + 120
       );
     }
   }
@@ -236,5 +247,13 @@ export class AppComponent implements OnInit {
     audio.src = '../assets/audio/hit.wav';
     audio.load();
     audio.play();
+  }
+  // localstorage for know best score
+  localStorageScoreBest() {
+    this.scoreBest = parseInt(localStorage.getItem("SCORE_BEST_KEY") ?? '0');
+    if (this.scoreBest < this.score) {
+      localStorage.setItem("SCORE_BEST_KEY", `${this.score}`);
+      this.scoreBest = this.score;
+    }
   }
 }
